@@ -1,4 +1,5 @@
 // Copyright 2018 Google LLC
+// Copyright 2020 Nokia
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,6 +18,7 @@ package main
 import (
 	"flag"
 	"time"
+	"os" 
 
 	workflowclientSet "github.com/argoproj/argo/pkg/client/clientset/versioned"
 	workflowinformers "github.com/argoproj/argo/pkg/client/informers/externalversions"
@@ -33,7 +35,6 @@ import (
 var (
 	masterURL  string
 	kubeconfig string
-	namespace  string
 )
 
 func main() {
@@ -64,7 +65,8 @@ func main() {
 
 	var scheduleInformerFactory swfinformers.SharedInformerFactory
 	var workflowInformerFactory workflowinformers.SharedInformerFactory
-	if namespace == "" {
+	namespace, exists := os.LookupEnv("NAMESPACE") 
+	if exists && namespace == "" { 
 		scheduleInformerFactory = swfinformers.NewSharedInformerFactory(scheduleClient, time.Second*30)
 		workflowInformerFactory = workflowinformers.NewSharedInformerFactory(workflowClient, time.Second*30)
 	} else {
@@ -91,5 +93,5 @@ func main() {
 func init() {
 	flag.StringVar(&kubeconfig, "kubeconfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
 	flag.StringVar(&masterURL, "master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
-	flag.StringVar(&namespace, "namespace", "", "The namespace name used for Kubernetes informers to obtain the listers.")
+	//flag.StringVar(&namespace, "namespace", "", "The namespace name used for Kubernetes informers to obtain the listers.")
 }
